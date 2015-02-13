@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 
-#define DEFAULT_BOARD_SIZE 9
+#define DEFAULT_BOARD_SIZE 1
 
 #define NAVBAR_HEIGHT 50
 #define LEAST_SPACE 50
@@ -315,13 +315,17 @@
             if(buttonStatus == STATE_CLOSE || buttonStatus == STATE_QUESTION){
                 unOpenMines += 1;
             }
-            else if(buttonStatus ==STATE_FLAG){
+            if(buttonStatus ==STATE_FLAG){
                 unOpenMines +=1;
                 flags += 1;
             }
         }
+    
+    NSLog(@"Yes It here");
     if(flags == mines || unOpenMines==mines){
         self.win = YES;
+        self.gameOver = YES;
+        NSLog(@"Game: you should have won here");
         return YES;
     }
     return NO;
@@ -357,7 +361,8 @@
     [self checkWin];
     
     if(self.gameOver){
-        [self drawBoard];
+        [self gameIsOver:YES];
+//        [self drawBoard];
     }
     
     /*
@@ -423,7 +428,7 @@
             UIImage * image = [UIImage imageNamed:@"explode.png"];
             [button setBackgroundImage:image forState:UIControlStateNormal];
             button.status = [NSNumber numberWithInt:STATE_EXPLODE];
-            [self gameIsOver:NO];
+            [self gameIsOver:YES];
             return;
         }
         
