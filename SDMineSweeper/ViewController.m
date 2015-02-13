@@ -8,10 +8,14 @@
 
 #import "ViewController.h"
 
-#define DEFAULT_BOARD_SIZE 1
+#define DEFAULT_BOARD_SIZE 9
 
-#define NAVBAR_HEIGHT 50
-#define LEAST_SPACE 50
+#define NAVBAR_HEIGHT 60
+#define LEAST_SPACE 60
+#define NAVBAR_TITLE_VIEW_HEIGHT NAVBAR_HEIGHT-10
+#define NAVBAR_TITLE_VIEW_BUTTON_HEIGHT NAVBAR_HEIGHT-20
+
+
 #define ZERO_VALUE 0
 #define ONE_VALUE 1
 #define TWO_VALUE 2
@@ -41,6 +45,8 @@
 @property (nonatomic) CGFloat mineBoardToScreenBottomSpace;
 @property (nonatomic, strong) NSMutableArray * board;
 @property (nonatomic, strong)  UINavigationBar *navBar;
+@property (nonatomic, strong)  UIButton *resetButton;
+
 @property BOOL win;
 @property BOOL gameOver;
 
@@ -144,13 +150,27 @@
     self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, screenWidth, NAVBAR_HEIGHT)];
     [self.view addSubview:self.navBar];
     
-    UIBarButtonItem *backButton = [[UIBarButtonItem alloc]initWithTitle:@"Reset"
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc]initWithTitle:@"Cheat"
                                                                   style:UIBarButtonItemStylePlain
-                                                                 target:self action:@selector(doResetBoard:)];
+                                                                 target:self action:@selector(drawBoard)];
     UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:@""];
     item.rightBarButtonItem = backButton;
     item.hidesBackButton = YES;
     [self.navBar pushNavigationItem:item animated:NO];
+    
+    
+    UIView *buttonContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, NAVBAR_TITLE_VIEW_HEIGHT, NAVBAR_TITLE_VIEW_HEIGHT)];
+    buttonContainer.backgroundColor = [UIColor clearColor];
+    self.resetButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.resetButton setFrame:CGRectMake(0, 0, 44, 44)];
+    [self.resetButton setBackgroundImage:[UIImage imageNamed:@"smile.png"] forState:UIControlStateNormal];
+    [self.resetButton addTarget:self action:@selector(doResetBoard:) forControlEvents:UIControlEventTouchUpInside];
+    [self.resetButton setShowsTouchWhenHighlighted:YES];
+    [buttonContainer addSubview:self.resetButton];
+    
+    //add your spacer images and button1 and button2...
+    item.titleView = buttonContainer;
+
 }
 
 -(void)setScrollViewCenter{
@@ -158,6 +178,18 @@
     self.scrollView.contentOffset = CGPointMake(newContentOffsetX, 0);
 }
 
+-(void)holdDown{
+    if(!self.gameOver){
+        NSLog(@"hold   down---");
+        [self.resetButton setBackgroundImage:[UIImage imageNamed:@"suprise.png"] forState:UIControlStateNormal];
+    }
+}
+-(void)holdRelease{
+    if(!self.gameOver){
+        NSLog(@"hold   Release---");
+        [self.resetButton setBackgroundImage:[UIImage imageNamed:@"smile.png"] forState:UIControlStateNormal];
+    }
+}
 -(void)setScrollViewSize{
     
     CGRect screenRect = [[UIScreen mainScreen] bounds];;
@@ -251,6 +283,9 @@
                        action:@selector(mineSquarePressed:)
              forControlEvents:UIControlEventTouchUpInside];
             UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(mineSquareLongPressed:)];
+            
+           // [button addTarget:self action:@selector(holdDown) forControlEvents:UIControlEventTouchUpInside];
+           // [button addTarget:self action:@selector(holdRelease) forControlEvents:UIControlEventTouchUpInside];
 
             [button addGestureRecognizer:longPress];
             NSLog(@"-------");
@@ -299,6 +334,12 @@
         }
     
     }
+    
+    [self checkWin];
+    
+    if(self.gameOver){
+        [self gameIsOver:YES];
+    }
 }
 
 -(BOOL)checkWin{
@@ -344,6 +385,16 @@
                     [button setBackgroundImage:image forState:UIControlStateNormal];
                 }
             }
+            if(buttonStatus == STATE_FLAG){
+                if(val!=MINE_VALUE){
+                    UIImage * image = [UIImage imageNamed:@"failed_flag.png"];
+                    [button setBackgroundImage:image forState:UIControlStateNormal];
+                }
+                if(val!=MINE_VALUE){
+                    UIImage * image = [UIImage imageNamed:@"bomb.png"];
+                    [button setBackgroundImage:image forState:UIControlStateNormal];
+                }
+            }
 
         }
 }
@@ -351,7 +402,7 @@
 -(void)mineSquarePressed:(id)sender{
     if(self.gameOver)
         return;
-    
+
     UIButton *button = (UIButton*)sender;
     int x = (int)(button.tag-TAG_START)/100;
     int y = (int)(button.tag-TAG_START)%100;
@@ -362,7 +413,6 @@
     
     if(self.gameOver){
         [self gameIsOver:YES];
-//        [self drawBoard];
     }
     
     /*
@@ -381,14 +431,18 @@
     NSLog(@"pressed (%d, %d)", x, y);
 }
 
--(void)gameIsOver:(BOOL)win {
-    self.gameOver = YES;
-
+-(void)gameIsOver:(BOOL)gameOver {
+    [self drawBoard];
     NSString *msg = @"Let's try it again?" ;
     NSString *title = @"Sorry";
-    if(win){
+    if(self.win){
         msg = @"You Win!";
         title = @"Congratulations!";
+        [self.resetButton setBackgroundImage:[UIImage imageNamed:@"win.png"] forState:UIControlStateNormal];
+
+    }
+    else{
+        [self.resetButton setBackgroundImage:[UIImage imageNamed:@"cry.png"] forState:UIControlStateNormal];
     }
 
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
@@ -428,7 +482,8 @@
             UIImage * image = [UIImage imageNamed:@"explode.png"];
             [button setBackgroundImage:image forState:UIControlStateNormal];
             button.status = [NSNumber numberWithInt:STATE_EXPLODE];
-            [self gameIsOver:YES];
+            self.gameOver = YES;
+            //[self gameIsOver:YES];
             return;
         }
         
