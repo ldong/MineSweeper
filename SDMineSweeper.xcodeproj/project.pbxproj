@@ -459,6 +459,7 @@
 				AC11739E1A8D9C5700946C4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		AC11739F1A8D9C5700946C4C /* Build configuration list for PBXNativeTarget "SDMineSweeperTests" */ = {
 			isa = XCConfigurationList;
@@ -467,6 +468,7 @@
 				AC1173A11A8D9C5700946C4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

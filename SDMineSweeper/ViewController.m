@@ -310,7 +310,6 @@
     
     for(int i=0; i<self.mineSizePerRow; ++i)
         for(int j=0; j<self.mineSizePerRow; ++j){
-            [self setValueAtRow:i column:j];
             UIButton *button = (UIButton *)[self.scrollView viewWithTag:TAG_START+100*i+j];
             int buttonStatus = [(NSNumber*)button.status integerValue];
             if(buttonStatus == STATE_CLOSE || buttonStatus == STATE_QUESTION){
@@ -328,6 +327,22 @@
     return NO;
 }
 
+-(void)drawBoard{
+
+    for(int i=0; i<self.mineSizePerRow; ++i)
+        for(int j=0; j<self.mineSizePerRow; ++j){
+            int val = [self getBoardValueAtRow:i column:j];
+            UIButton *button = (UIButton *)[self.scrollView viewWithTag:TAG_START+100*i+j];
+            int buttonStatus = [(NSNumber*)button.status integerValue];
+            if(buttonStatus == STATE_CLOSE || buttonStatus == STATE_QUESTION){
+                if(val == MINE_VALUE){
+                    UIImage * image = [UIImage imageNamed:@"bomb.png"];
+                    [button setBackgroundImage:image forState:UIControlStateNormal];
+                }
+            }
+
+        }
+}
 
 -(void)mineSquarePressed:(id)sender{
     if(self.gameOver)
@@ -339,8 +354,10 @@
 
     [self traversalAtRow:x column:y];
     
-    if([self checkWin]){
+    [self checkWin];
     
+    if(self.gameOver){
+        [self drawBoard];
     }
     
     /*
